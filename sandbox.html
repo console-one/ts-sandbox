@@ -1,0 +1,71 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScript Sandbox</title>
+ <link href='https://fonts.googleapis.com/css?family=Azeret Mono' rel='stylesheet'>
+    
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+<style>
+  .CodeMirror {
+    height: auto;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+  }
+  #output {
+    white-space: pre-wrap;
+    background: #f4f4f4;
+    border: 1px solid #ccc;
+    padding: 10px;
+  }
+  body {
+    font-family: Azeret Mono;
+    font-style: normal; 
+  }
+  
+  
+</style>
+<script src="debug.js"></script>
+</head>
+<body>
+  
+<h1>Code Execution Sandbox</h1>
+<textarea id="code" name="code">console.log('Hello, TypeScript');</textarea>
+<button class="Button" onclick="executeCode()">Execute</button>
+
+<div id="output"></div>
+<script>
+  var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    lineNumbers: true,
+    mode: "text/typescript",
+    tabSize: 2
+  });
+  var allResults = [];
+  async function executeCode() {
+    const rawData = editor.getValue();
+    const response = await fetch('./compiler.ts', {
+      method: 'POST',
+      headers: {},
+      body: JSON.stringify({ code: rawData })
+    })
+
+    try {
+      const result = await response.json();
+      let text = result.logs.join('\n')
+      allResults.push(text); 
+    document.getElementById('output').textContent = text;
+    } catch (err) { 
+      let text = 'Error:\n' + await response.text();
+      allResults.push(text); 
+      document.getElementById('output').textContent = text;
+    }
+  }
+</script>
+</body>
+</html>
